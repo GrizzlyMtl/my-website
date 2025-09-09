@@ -296,13 +296,13 @@ function enableEdit(update, idx) {
     document.getElementById('edit-update-form').onsubmit = function(e) {
         e.preventDefault();
         // Update locally (no backend persistence)
-        updatesData[idx] = {
+        updates[idx] = {
             user: document.getElementById('edit-user').value,
             date: document.getElementById('edit-date').value,
             time: document.getElementById('edit-time').value,
             detail: document.getElementById('edit-detail').value
         };
-        renderUpdates(updatesData);
+        renderUpdates(updates);
         closeUpdateModal();
     };
 }
