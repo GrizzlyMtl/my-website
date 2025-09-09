@@ -231,7 +231,36 @@ document.getElementById('add-update-form').onsubmit = function(e) {
     }
   });
 }
-window.addEventListener('DOMContentLoaded', fetchUpdates);
+window.addEventListener('DOMContentLoaded', function() {
+    const saved = localStorage.getItem(DARK_MODE_KEY);
+    if (saved === 'dark') {
+        document.body.classList.add('dark-mode');
+    } else {
+        document.body.classList.remove('dark-mode');
+    }
+    fetch('/updates')
+        .then(response => response.json())
+        .then(data => {
+            updatesData = data;
+            renderUpdates(updatesData);
+        });
+});
+
+function renderUpdates(updates) {
+    const container = document.getElementById('updates-cards');
+    container.innerHTML = '';
+    updates.forEach(update => {
+        const card = document.createElement('div');
+        card.className = 'card p-3 mb-2';
+        card.innerHTML = `
+            <div><strong>User:</strong> ${update.user}</div>
+            <div><strong>Date:</strong> ${update.date}</div>
+            <div><strong>Time:</strong> ${update.time}</div>
+            <div><strong>Description:</strong> ${update.detail}</div>
+        `;
+        container.appendChild(card);
+    });
+}
 </script>
 </body>
 </html>

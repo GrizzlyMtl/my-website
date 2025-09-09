@@ -33,6 +33,10 @@ class WebsiteServer:
         def readme():
             return send_from_directory(os.path.dirname(os.path.abspath(__file__)), 'README.md')
 
+        @self.app.route('/new-idea.html')
+        def new_idea():
+            return send_from_directory(os.path.dirname(os.path.abspath(__file__)), 'new-idea.html')
+
         @self.app.route('/updates', methods=['GET'])
         def get_updates():
             return jsonify(self.UPDATES)
