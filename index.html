@@ -30,25 +30,11 @@
         <div class="d-flex justify-content-end mb-4">
             <a href="#" class="btn btn-primary">View All Repositories</a>
         </div>
-        <section class="mb-4" aria-label="Most Recent Repositories">
-            <h3 class="mb-3" style="color:#2563eb;">Most Recent Repositories</h3>
-            <div class="row g-3" id="repo-list-section">
-                <div class="col-12 col-sm-6 col-lg-4 repo-card">
-                    <div class="card h-100" aria-label="Repository Card">
-                        <div class="card-body">
-                            <h5 class="card-title"><a href="#" aria-label="View Repo Name">Repo Name</a></h5>
-                            <h6 class="card-subtitle mb-2 text-muted">by <span aria-label="Owner">Owner Name</span> on <span aria-label="Date">2025-09-08</span></h6>
-                            <p class="card-text">Repository description goes here.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 text-muted">No repositories found.</div>
-            </div>
-            <section class="mb-4" aria-label="Site Updates">
-              <h3 class="mb-3" style="color:#2563eb;">Site Updates</h3>
-              <input type="text" id="update-search" class="form-control mb-3" placeholder="Search updates by user, date, or description..." oninput="filterUpdates()">
-              <div id="updates-cards" class="d-flex flex-wrap gap-3"></div>
-              <div id="update-detail-modal" class="modal" tabindex="-1" style="display:none;">
+        <section class="mb-4" aria-label="Most Recent Website Updates">
+            <h3 class="mb-3" style="color:#2563eb;">Most Recent Website Updates</h3>
+            <input type="text" id="update-search" class="form-control mb-3" placeholder="Search updates by user, date, or description..." oninput="filterUpdates()">
+            <div id="updates-cards" class="d-flex flex-wrap gap-3"></div>
+            <div id="update-detail-modal" class="modal" tabindex="-1" style="display:none;">
                 <div class="modal-dialog">
                   <div class="modal-content">
                     <div class="modal-header">
@@ -79,7 +65,6 @@
                   </div>
                 </div>
               </div>
-            </section>
         </section>
     </main>
     <button class="fab" aria-label="Create Repository" title="Create Repository">
