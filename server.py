@@ -41,6 +41,18 @@ class WebsiteServer:
         def get_updates():
             return jsonify(self.UPDATES)
 
+        @self.app.route('/UpdateIdea', methods=['GET', 'POST'])
+        def update_idea():
+            if request.method == 'POST':
+                idea = request.form.get('idea')
+                if not hasattr(self, 'IDEAS'):
+                    self.IDEAS = []
+                if idea:
+                    self.IDEAS.append(idea)
+                return ('<script>window.location="/";</script>', 302)
+            else:
+                return ('<script>window.location="/new-idea.html";</script>', 302)
+
         # Add other routes as needed...
 
     def run(self):

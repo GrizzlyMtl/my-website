@@ -2,23 +2,40 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Submit a New Idea</title>
+    <title>Submit a New Idea | Grizz's GitRepoShare</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container py-5">
-        <h2 class="mb-4">Submit a New Update/Features Idea</h2>
-        <form method="POST" action="/UpdateIdea" class="mb-4">
-            <div class="mb-3">
-                <label for="idea" class="form-label">Your Idea</label>
-                <input type="text" class="form-control" id="idea" name="idea" placeholder="Describe your idea..." required>
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8 col-sm-12">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h2 class="mb-4 text-center" style="color:#eab308;">Submit a New Update/Features Idea</h2>
+                        <form method="POST" action="/UpdateIdea" class="mb-4">
+                            <div class="mb-3">
+                                <label for="idea" class="form-label">Your Idea</label>
+                                <input type="text" class="form-control" id="idea" name="idea" placeholder="Describe your idea..." required>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-warning">Submit Idea</button>
+                            </div>
+                        </form>
+                        <div class="text-center">
+                            <a href="/" class="btn btn-secondary">Back to Home</a>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <button type="submit" class="btn btn-warning">Submit Idea</button>
-        </form>
-        <a href="/" class="btn btn-secondary">Back to Home</a>
+        </div>
     </div>
+    <footer class="bg-light py-3 mt-5">
+        <div class="container text-center">
+            <span class="text-muted">&copy; 2025 Grizz's GitRepoShare</span>
+        </div>
+    </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
