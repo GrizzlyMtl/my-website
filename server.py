@@ -1,5 +1,6 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_from_directory
 from datetime import datetime
+import os
 
 app = Flask(__name__)
 
@@ -10,6 +11,10 @@ UPDATES = [
     {"date": "2025-09-06", "detail": "Created sitemap.xml for SEO."},
     {"date": "2025-09-05", "detail": "Initial project setup and repository view."}
 ]
+
+@app.route('/')
+def home():
+    return send_from_directory(os.path.dirname(os.path.abspath(__file__)), 'index.html')
 
 @app.route('/updates', methods=['GET'])
 def get_updates():
