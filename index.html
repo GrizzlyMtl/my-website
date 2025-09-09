@@ -29,36 +29,49 @@
             <input type="text" id="update-search" class="form-control mb-3" placeholder="Search updates by user, date, or description..." oninput="filterUpdates()">
             <div id="updates-cards" class="d-flex flex-wrap gap-3"></div>
             <div id="update-detail-modal" class="modal" tabindex="-1" style="display:none;">
-                <div class="modal-dialog">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <h5 class="modal-title">Update Detail</h5>
-                      <button type="button" class="btn-close" onclick="closeUpdateModal()"></button>
-                    </div>
-                    <div class="modal-body">
-                      <form id="update-edit-form">
-                        <div class="mb-2">
-                          <label for="update-user" class="form-label">User</label>
-                          <input type="text" class="form-control" id="update-user" name="user" readonly>
-                        </div>
-                        <div class="mb-2">
-                          <label for="update-date" class="form-label">Date</label>
-                          <input type="text" class="form-control" id="update-date" name="date" readonly>
-                        </div>
-                        <div class="mb-2">
-                          <label for="update-time" class="form-label">Time</label>
-                          <input type="text" class="form-control" id="update-time" name="time" readonly>
-                        </div>
-                        <div class="mb-2">
-                          <label for="update-desc" class="form-label">Description</label>
-                          <textarea class="form-control" id="update-desc" name="desc"></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Save Changes</button>
-                      </form>
-                    </div>
-                  </div>
-                </div>
+      <div class="modal-dialog">
+        <div class="modal-content" id="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Update Detail</h5>
+            <button type="button" class="btn-close" onclick="closeUpdateModal()"></button>
+          </div>
+          <div class="modal-body">
+            <form id="update-edit-form">
+              <div class="mb-2">
+                <label for="update-user" class="form-label">User</label>
+                <input type="text" class="form-control" id="update-user" name="user" readonly>
               </div>
+              <div class="mb-2">
+                <label for="update-date" class="form-label">Date</label>
+                <input type="text" class="form-control" id="update-date" name="date" readonly>
+              </div>
+              <div class="mb-2">
+                <label for="update-time" class="form-label">Time</label>
+                <input type="text" class="form-control" id="update-time" name="time" readonly>
+              </div>
+              <div class="mb-2">
+                <label for="update-type" class="form-label">Type</label>
+                <input type="text" class="form-control" id="update-type" name="type" readonly>
+              </div>
+              <div class="mb-2">
+                <label for="update-tags" class="form-label">Tags</label>
+                <input type="text" class="form-control" id="update-tags" name="tags" readonly>
+              </div>
+              <div class="mb-2">
+                <label for="update-desc" class="form-label">Description</label>
+                <textarea class="form-control" id="update-desc" name="desc" readonly></textarea>
+              </div>
+              <div id="edit-buttons" style="display:none;">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="button" class="btn btn-secondary" onclick="toggleEdit(false)">Cancel</button>
+              </div>
+            </form>
+            <button id="edit-btn" class="btn btn-warning mt-2" onclick="toggleEdit(true)">Edit</button>
+            <div id="save-confirm" class="alert alert-success mt-2" style="display:none;">Update saved!</div>
+          </div>
+        </div>
+      </div>
+    </div>
         </section>
     </main>
     <button class="fab" aria-label="Create Repository" title="Create Repository">
@@ -92,84 +105,104 @@
             document.body.classList.remove('dark-mode');
         }
     });
-    let updatesData = [];
-    let filteredUpdates = [];
-    function fetchUpdates() {
-      fetch('/updates')
-        .then(res => res.json())
-        .then(updates => {
-          updatesData = updates;
-          filteredUpdates = updatesData;
-          renderUpdateCards();
-        });
-    }
-    function filterUpdates() {
-      const query = document.getElementById('update-search').value.toLowerCase();
-      filteredUpdates = updatesData.filter(update =>
-        (update.user || '').toLowerCase().includes(query) ||
-        (update.date || '').toLowerCase().includes(query) ||
-        (update.detail || '').toLowerCase().includes(query)
-      );
+let updatesData = [];
+let filteredUpdates = [];
+let editing = false;
+let currentIdx = null;
+function fetchUpdates() {
+  fetch('/updates')
+    .then(res => res.json())
+    .then(updates => {
+      updatesData = updates;
+      filteredUpdates = updatesData;
       renderUpdateCards();
+    });
+}
+function filterUpdates() {
+  const query = document.getElementById('update-search').value.toLowerCase();
+  filteredUpdates = updatesData.filter(update =>
+    (update.user || '').toLowerCase().includes(query) ||
+    (update.date || '').toLowerCase().includes(query) ||
+    (update.detail || '').toLowerCase().includes(query)
+  );
+  renderUpdateCards();
+}
+function renderUpdateCards() {
+  const container = document.getElementById('updates-cards');
+  container.innerHTML = '';
+  filteredUpdates.forEach((update, idx) => {
+    const card = document.createElement('div');
+    card.className = 'card p-3';
+    card.style.minWidth = '220px';
+    card.innerHTML = `
+      <div><strong>User:</strong> ${update.user || 'Admin'}</div>
+      <div><strong>Date:</strong> ${update.date}</div>
+    `;
+    card.onclick = function() {
+      const idxInData = updatesData.indexOf(update);
+      showUpdateDetail(idxInData);
+    };
+    container.appendChild(card);
+  });
+}
+function showUpdateDetail(idx) {
+  currentIdx = idx;
+  const update = updatesData[idx];
+  document.getElementById('update-user').value = update.user || 'Admin';
+  document.getElementById('update-date').value = update.date;
+  document.getElementById('update-time').value = update.time || '';
+  document.getElementById('update-type').value = update.type || '';
+  document.getElementById('update-tags').value = update.tags || '';
+  document.getElementById('update-desc').value = update.detail;
+  document.getElementById('update-desc').readOnly = true;
+  document.getElementById('edit-btn').style.display = 'block';
+  document.getElementById('edit-buttons').style.display = 'none';
+  document.getElementById('save-confirm').style.display = 'none';
+  document.getElementById('modal-content').classList.remove('editing');
+  const modal = document.getElementById('update-detail-modal');
+  modal.classList.add('active');
+  modal.style.display = 'flex';
+}
+function toggleEdit(enable) {
+  editing = enable;
+  document.getElementById('update-desc').readOnly = !enable;
+  document.getElementById('edit-btn').style.display = enable ? 'none' : 'block';
+  document.getElementById('edit-buttons').style.display = enable ? 'block' : 'none';
+  document.getElementById('modal-content').classList.toggle('editing', enable);
+}
+document.getElementById('update-edit-form').onsubmit = function(e) {
+  e.preventDefault();
+  saveUpdate(currentIdx);
+};
+function saveUpdate(idx) {
+  const newDesc = document.getElementById('update-desc').value;
+  fetch('/update/' + idx, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ detail: newDesc })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.status === 'success') {
+      updatesData[idx].detail = newDesc;
+      renderUpdateCards();
+      document.getElementById('save-confirm').style.display = 'block';
+      toggleEdit(false);
+      setTimeout(() => {
+        document.getElementById('save-confirm').style.display = 'none';
+      }, 1500);
+    } else {
+      alert('Error updating: ' + data.message);
     }
-    function renderUpdateCards() {
-      const container = document.getElementById('updates-cards');
-      container.innerHTML = '';
-      filteredUpdates.forEach((update, idx) => {
-        const card = document.createElement('div');
-        card.className = 'card p-3';
-        card.style.minWidth = '220px';
-        card.innerHTML = `
-          <div><strong>User:</strong> ${update.user || 'Admin'}</div>
-          <div><strong>Date:</strong> ${update.date}</div>
-          <button class="btn btn-sm btn-info mt-2" onclick="showUpdateDetailByFiltered(${idx})">Detail View</button>
-        `;
-        container.appendChild(card);
-      });
-    }
-    function showUpdateDetailByFiltered(filteredIdx) {
-      const update = filteredUpdates[filteredIdx];
-      const idx = updatesData.indexOf(update);
-      showUpdateDetail(idx);
-    }
-    function showUpdateDetail(idx) {
-      const update = filteredUpdates[idx];
-      document.getElementById('update-user').value = update.user || 'Admin';
-      document.getElementById('update-date').value = update.date;
-      document.getElementById('update-time').value = update.time || '';
-      document.getElementById('update-desc').value = update.detail;
-      const modal = document.getElementById('update-detail-modal');
-      modal.classList.add('active');
-      modal.style.display = 'flex';
-      document.getElementById('update-edit-form').onsubmit = function(e) {
-        e.preventDefault();
-        saveUpdate(updatesData.indexOf(update));
-      };
-    }
-    function closeUpdateModal() {
-      const modal = document.getElementById('update-detail-modal');
-      modal.classList.remove('active');
-      modal.style.display = 'none';
-    }
-    function saveUpdate(idx) {
-      const newDesc = document.getElementById('update-desc').value;
-      fetch('/update/' + idx, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ detail: newDesc })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.status === 'success') {
-          updatesData[idx].detail = newDesc;
-          renderUpdateCards();
-          closeUpdateModal();
-        } else {
-          alert('Error updating: ' + data.message);
-        }
-      });
-    }
-    window.addEventListener('DOMContentLoaded', fetchUpdates);
+  });
+}
+function closeUpdateModal() {
+  const modal = document.getElementById('update-detail-modal');
+  modal.classList.remove('active');
+  modal.style.display = 'none';
+  toggleEdit(false);
+}
+window.addEventListener('DOMContentLoaded', fetchUpdates);
 </script>
 </body>
 </html>
