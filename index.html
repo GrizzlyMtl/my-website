@@ -44,42 +44,42 @@
                 </div>
                 <div class="col-12 text-muted">No repositories found.</div>
             </div>
-        </section>
-        <section class="mb-4" aria-label="Site Updates">
-          <h3 class="mb-3" style="color:#2563eb;">Site Updates</h3>
-          <input type="text" id="update-search" class="form-control mb-3" placeholder="Search updates by user, date, or description..." oninput="filterUpdates()">
-          <div id="updates-cards" class="d-flex flex-wrap gap-3"></div>
-          <div id="update-detail-modal" class="modal" tabindex="-1" style="display:none;">
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title">Update Detail</h5>
-                  <button type="button" class="btn-close" onclick="closeUpdateModal()"></button>
-                </div>
-                <div class="modal-body">
-                  <form id="update-edit-form">
-                    <div class="mb-2">
-                      <label for="update-user" class="form-label">User</label>
-                      <input type="text" class="form-control" id="update-user" name="user" readonly>
+            <section class="mb-4" aria-label="Site Updates">
+              <h3 class="mb-3" style="color:#2563eb;">Site Updates</h3>
+              <input type="text" id="update-search" class="form-control mb-3" placeholder="Search updates by user, date, or description..." oninput="filterUpdates()">
+              <div id="updates-cards" class="d-flex flex-wrap gap-3"></div>
+              <div id="update-detail-modal" class="modal" tabindex="-1" style="display:none;">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title">Update Detail</h5>
+                      <button type="button" class="btn-close" onclick="closeUpdateModal()"></button>
                     </div>
-                    <div class="mb-2">
-                      <label for="update-date" class="form-label">Date</label>
-                      <input type="text" class="form-control" id="update-date" name="date" readonly>
+                    <div class="modal-body">
+                      <form id="update-edit-form">
+                        <div class="mb-2">
+                          <label for="update-user" class="form-label">User</label>
+                          <input type="text" class="form-control" id="update-user" name="user" readonly>
+                        </div>
+                        <div class="mb-2">
+                          <label for="update-date" class="form-label">Date</label>
+                          <input type="text" class="form-control" id="update-date" name="date" readonly>
+                        </div>
+                        <div class="mb-2">
+                          <label for="update-time" class="form-label">Time</label>
+                          <input type="text" class="form-control" id="update-time" name="time" readonly>
+                        </div>
+                        <div class="mb-2">
+                          <label for="update-desc" class="form-label">Description</label>
+                          <textarea class="form-control" id="update-desc" name="desc"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                      </form>
                     </div>
-                    <div class="mb-2">
-                      <label for="update-time" class="form-label">Time</label>
-                      <input type="text" class="form-control" id="update-time" name="time" readonly>
-                    </div>
-                    <div class="mb-2">
-                      <label for="update-desc" class="form-label">Description</label>
-                      <textarea class="form-control" id="update-desc" name="desc"></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                  </form>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
+            </section>
         </section>
     </main>
     <button class="fab" aria-label="Create Repository" title="Create Repository">
@@ -149,19 +149,23 @@
       });
     }
     function showUpdateDetail(idx) {
-      const update = updatesData[idx];
+      const update = filteredUpdates[idx];
       document.getElementById('update-user').value = update.user || 'Admin';
       document.getElementById('update-date').value = update.date;
       document.getElementById('update-time').value = update.time || '';
       document.getElementById('update-desc').value = update.detail;
-      document.getElementById('update-detail-modal').style.display = 'block';
+      const modal = document.getElementById('update-detail-modal');
+      modal.classList.add('active');
+      modal.style.display = 'flex';
       document.getElementById('update-edit-form').onsubmit = function(e) {
         e.preventDefault();
-        saveUpdate(idx);
+        saveUpdate(updatesData.indexOf(update));
       };
     }
     function closeUpdateModal() {
-      document.getElementById('update-detail-modal').style.display = 'none';
+      const modal = document.getElementById('update-detail-modal');
+      modal.classList.remove('active');
+      modal.style.display = 'none';
     }
     function saveUpdate(idx) {
       const newDesc = document.getElementById('update-desc').value;

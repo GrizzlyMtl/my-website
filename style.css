@@ -117,14 +117,24 @@ main {
 }
 /* Modal animation */
 .modal {
-    transition: opacity 0.3s;
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.4);
     opacity: 0;
     pointer-events: none;
+    z-index: 9999;
+    transition: opacity 0.3s;
 }
-.modal[style*="display: block"] {
+.modal.active {
     opacity: 1;
     pointer-events: auto;
     animation: modalPop 0.4s cubic-bezier(.25,.8,.25,1);
+}
+.modal .modal-dialog {
+    z-index: 10000;
 }
 @keyframes modalPop {
     0% { transform: scale(0.8); opacity: 0; }
