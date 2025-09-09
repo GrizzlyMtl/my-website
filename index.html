@@ -26,18 +26,11 @@
         </div>
         <section class="mb-4" aria-label="Most Recent Website Updates">
             <h3 class="mb-3" style="color:#2563eb;">Most Recent Website Updates</h3>
-            <form id="add-update-form" class="mb-4 p-3 rounded" style="background:rgba(255,255,255,0.08);">
-      <div class="row g-2">
-        <div class="col-md-2"><input type="text" class="form-control" id="add-user" placeholder="User" required></div>
-        <div class="col-md-2"><input type="text" class="form-control" id="add-type" placeholder="Type" required></div>
-        <div class="col-md-3"><input type="text" class="form-control" id="add-tags" placeholder="Tags"></div>
-        <div class="col-md-5"><input type="text" class="form-control" id="add-detail" placeholder="Description" required></div>
-      </div>
-      <button type="submit" class="btn btn-success mt-2">Add Update</button>
-      <span id="add-update-confirm" class="ms-3 text-success" style="display:none;">Update added!</span>
-    </form>
             <input type="text" id="update-search" class="form-control mb-3" placeholder="Search updates by user, date, or description..." oninput="filterUpdates()">
             <div id="updates-cards" class="d-flex flex-wrap gap-3"></div>
+        <div class="mt-4">
+          <a href="new-idea.html" class="btn btn-warning">New Idea</a>
+        </div>
             <div id="update-detail-modal" class="modal" tabindex="-1" style="display:none;">
       <div class="modal-dialog">
         <div class="modal-content" id="modal-content">
