@@ -6,10 +6,10 @@ app = Flask(__name__)
 
 # Example updates data
 UPDATES = [
-    {"user": "Owner", "date": "2025-09-08", "detail": "Added dark mode with persistent setting."},
-    {"user": "Owner", "date": "2025-09-07", "detail": "Moved styles to style.css for better maintainability."},
-    {"user": "Owner", "date": "2025-09-06", "detail": "Created sitemap.xml for SEO."},
-    {"user": "Owner", "date": "2025-09-05", "detail": "Initial project setup and repository view."}
+    {"user": "Owner", "date": "2025-09-08", "time": "14:30", "detail": "Added dark mode with persistent setting."},
+    {"user": "Owner", "date": "2025-09-07", "time": "10:15", "detail": "Moved styles to style.css for better maintainability."},
+    {"user": "Owner", "date": "2025-09-06", "time": "16:45", "detail": "Created sitemap.xml for SEO."},
+    {"user": "Owner", "date": "2025-09-05", "time": "09:00", "detail": "Initial project setup and repository view."}
 ]
 
 @app.route('/')

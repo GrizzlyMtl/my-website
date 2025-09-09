@@ -47,6 +47,7 @@
         </section>
         <section class="mb-4" aria-label="Site Updates">
           <h3 class="mb-3" style="color:#2563eb;">Site Updates</h3>
+          <input type="text" id="update-search" class="form-control mb-3" placeholder="Search updates by user, date, or description..." oninput="filterUpdates()">
           <div id="updates-cards" class="d-flex flex-wrap gap-3"></div>
           <div id="update-detail-modal" class="modal" tabindex="-1" style="display:none;">
             <div class="modal-dialog">
@@ -64,6 +65,10 @@
                     <div class="mb-2">
                       <label for="update-date" class="form-label">Date</label>
                       <input type="text" class="form-control" id="update-date" name="date" readonly>
+                    </div>
+                    <div class="mb-2">
+                      <label for="update-time" class="form-label">Time</label>
+                      <input type="text" class="form-control" id="update-time" name="time" readonly>
                     </div>
                     <div class="mb-2">
                       <label for="update-desc" class="form-label">Description</label>
@@ -109,26 +114,36 @@
         }
     });
     let updatesData = [];
+    let filteredUpdates = [];
     function fetchUpdates() {
       fetch('/updates')
         .then(res => res.json())
         .then(updates => {
           updatesData = updates;
+          filteredUpdates = updatesData;
           renderUpdateCards();
         });
+    }
+    function filterUpdates() {
+      const query = document.getElementById('update-search').value.toLowerCase();
+      filteredUpdates = updatesData.filter(update =>
+        (update.user || '').toLowerCase().includes(query) ||
+        (update.date || '').toLowerCase().includes(query) ||
+        (update.detail || '').toLowerCase().includes(query)
+      );
+      renderUpdateCards();
     }
     function renderUpdateCards() {
       const container = document.getElementById('updates-cards');
       container.innerHTML = '';
-      updatesData.forEach((update, idx) => {
+      filteredUpdates.forEach((update, idx) => {
         const card = document.createElement('div');
         card.className = 'card p-3';
         card.style.minWidth = '220px';
         card.innerHTML = `
           <div><strong>User:</strong> ${update.user || 'Admin'}</div>
           <div><strong>Date:</strong> ${update.date}</div>
-          <div><strong>Description:</strong> ${update.detail}</div>
-          <button class="btn btn-sm btn-info mt-2" onclick="showUpdateDetail(${idx})">Detail View</button>
+          <button class="btn btn-sm btn-info mt-2" onclick="showUpdateDetail(${updatesData.indexOf(update)})">Detail View</button>
         `;
         container.appendChild(card);
       });
@@ -137,6 +152,7 @@
       const update = updatesData[idx];
       document.getElementById('update-user').value = update.user || 'Admin';
       document.getElementById('update-date').value = update.date;
+      document.getElementById('update-time').value = update.time || '';
       document.getElementById('update-desc').value = update.detail;
       document.getElementById('update-detail-modal').style.display = 'block';
       document.getElementById('update-edit-form').onsubmit = function(e) {
