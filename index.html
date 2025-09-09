@@ -212,17 +212,106 @@ window.addEventListener('DOMContentLoaded', function() {
 function renderUpdates(updates) {
     const container = document.getElementById('updates-cards');
     container.innerHTML = '';
-    updates.forEach(update => {
+    updates.forEach((update, idx) => {
         const card = document.createElement('div');
-        card.className = 'card p-3 mb-2';
+        card.className = 'card p-3 mb-2 update-card';
+        card.style.cursor = 'pointer';
         card.innerHTML = `
             <div><strong>User:</strong> ${update.user}</div>
             <div><strong>Date:</strong> ${update.date}</div>
             <div><strong>Time:</strong> ${update.time}</div>
             <div><strong>Description:</strong> ${update.detail}</div>
         `;
+        card.addEventListener('click', function() {
+            showUpdateModal(update, idx);
+        });
         container.appendChild(card);
     });
+}
+
+function showUpdateModal(update, idx) {
+    let modal = document.getElementById('update-detail-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'update-detail-modal';
+        modal.className = 'modal';
+        modal.tabIndex = -1;
+        modal.style.display = 'block';
+        modal.innerHTML = `
+            <div class=\"modal-dialog\">
+                <div class=\"modal-content\">
+                    <div class=\"modal-header\">
+                        <h5 class=\"modal-title\">Update Detail</h5>
+                        <button type=\"button\" class=\"btn-close\" onclick=\"closeUpdateModal()\"></button>
+                    </div>
+                    <div class=\"modal-body\" id=\"modal-body\"></div>
+                    <div class=\"modal-footer\">
+                        <button id=\"edit-btn\" class=\"btn btn-warning\">Edit</button>
+                        <button type=\"button\" class=\"btn btn-secondary\" onclick=\"closeUpdateModal()\">Close</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    } else {
+        modal.style.display = 'block';
+    }
+    const body = modal.querySelector('#modal-body');
+    body.innerHTML = `
+        <div><strong>User:</strong> <span id=\"modal-user\">${update.user}</span></div>
+        <div><strong>Date:</strong> <span id=\"modal-date\">${update.date}</span></div>
+        <div><strong>Time:</strong> <span id=\"modal-time\">${update.time}</span></div>
+        <div><strong>Description:</strong> <span id=\"modal-detail\">${update.detail}</span></div>
+    `;
+    const editBtn = modal.querySelector('#edit-btn');
+    editBtn.onclick = function() {
+        enableEdit(update, idx);
+    };
+}
+
+function enableEdit(update, idx) {
+    const body = document.getElementById('modal-body');
+    body.innerHTML = `
+        <form id=\"edit-update-form\">
+            <div class=\"mb-2\">
+                <label>User</label>
+                <input type=\"text\" class=\"form-control\" id=\"edit-user\" value=\"${update.user}\" required>
+            </div>
+            <div class=\"mb-2\">
+                <label>Date</label>
+                <input type=\"text\" class=\"form-control\" id=\"edit-date\" value=\"${update.date}\" required>
+            </div>
+            <div class=\"mb-2\">
+                <label>Time</label>
+                <input type=\"text\" class=\"form-control\" id=\"edit-time\" value=\"${update.time}\" required>
+            </div>
+            <div class=\"mb-2\">
+                <label>Description</label>
+                <textarea class=\"form-control\" id=\"edit-detail\" required>${update.detail}</textarea>
+            </div>
+            <button type=\"submit\" class=\"btn btn-primary\">Save</button>
+            <button type=\"button\" class=\"btn btn-secondary\" onclick=\"closeUpdateModal()\">Cancel</button>
+        </form>
+    `;
+    document.getElementById('edit-update-form').onsubmit = function(e) {
+        e.preventDefault();
+        // Update locally (no backend persistence)
+        updatesData[idx] = {
+            user: document.getElementById('edit-user').value,
+            date: document.getElementById('edit-date').value,
+            time: document.getElementById('edit-time').value,
+            detail: document.getElementById('edit-detail').value
+        };
+        renderUpdates(updatesData);
+        closeUpdateModal();
+    };
+}
+
+function closeUpdateModal() {
+    const modal = document.getElementById('update-detail-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
 }
 
 function renderIdeas(ideas) {
