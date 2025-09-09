@@ -45,6 +45,13 @@
                 <div class="col-12 text-muted">No repositories found.</div>
             </div>
         </section>
+        <section class="mb-4" aria-label="Site Updates">
+          <h3 class="mb-3" style="color:#2563eb;">Site Updates</h3>
+          <button class="btn btn-info mb-2" onclick="toggleUpdates()">Show Updates</button>
+          <div id="updates-detail" style="display:none; text-align:left; background:rgba(255,255,255,0.15); padding:1em; border-radius:10px;">
+            <ul id="updates-list"></ul>
+          </div>
+        </section>
     </main>
     <button class="fab" aria-label="Create Repository" title="Create Repository">
         <i class="bi bi-plus-lg"></i>
@@ -53,9 +60,50 @@
 </body>
 <script>
     // Dark mode toggle logic
-    document.querySelector('.btn.btn-secondary[aria-label="Toggle dark mode"]')?.addEventListener('click', function() {
-        document.body.classList.toggle('dark-mode');
+    const DARK_MODE_KEY = 'colorMode';
+    const darkModeBtn = document.querySelector('.btn.btn-secondary[aria-label="Toggle dark mode"]');
+    function setColorMode(mode) {
+        if (mode === 'dark') {
+            document.body.classList.add('dark-mode');
+            localStorage.setItem(DARK_MODE_KEY, 'dark');
+        } else {
+            document.body.classList.remove('dark-mode');
+            localStorage.setItem(DARK_MODE_KEY, 'light');
+        }
+    }
+    darkModeBtn?.addEventListener('click', function() {
+        const isDark = document.body.classList.contains('dark-mode');
+        setColorMode(isDark ? 'light' : 'dark');
     });
+    // On page load, restore color mode
+    window.addEventListener('DOMContentLoaded', function() {
+        const saved = localStorage.getItem(DARK_MODE_KEY);
+        if (saved === 'dark') {
+            document.body.classList.add('dark-mode');
+        } else {
+            document.body.classList.remove('dark-mode');
+        }
+    });
+    function toggleUpdates() {
+      const detail = document.getElementById('updates-detail');
+      detail.style.display = detail.style.display === 'none' ? 'block' : 'none';
+      if (detail.style.display === 'block') {
+        fetchUpdates();
+      }
+    }
+    function fetchUpdates() {
+      fetch('/updates')
+        .then(res => res.json())
+        .then(updates => {
+          const list = document.getElementById('updates-list');
+          list.innerHTML = '';
+          updates.forEach(update => {
+            const li = document.createElement('li');
+            li.innerHTML = `<strong>${update.date}:</strong> ${update.detail}`;
+            list.appendChild(li);
+          });
+        });
+    }
 </script>
 </body>
 </html>
