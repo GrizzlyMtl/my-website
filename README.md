@@ -28,3 +28,11 @@ A simple web-based Git repository viewer and manager.
 
 ## License
 MIT
+
+# my-website
+Learning Git
+<<<<<<< HEAD
+(your local changes)
+=======
+(changes from remote)
+>>>>>>> main
