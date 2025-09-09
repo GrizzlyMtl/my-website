@@ -47,9 +47,33 @@
         </section>
         <section class="mb-4" aria-label="Site Updates">
           <h3 class="mb-3" style="color:#2563eb;">Site Updates</h3>
-          <button class="btn btn-info mb-2" onclick="toggleUpdates()">Show Updates</button>
-          <div id="updates-detail" style="display:none; text-align:left; background:rgba(255,255,255,0.15); padding:1em; border-radius:10px;">
-            <ul id="updates-list"></ul>
+          <div id="updates-cards" class="d-flex flex-wrap gap-3"></div>
+          <div id="update-detail-modal" class="modal" tabindex="-1" style="display:none;">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Update Detail</h5>
+                  <button type="button" class="btn-close" onclick="closeUpdateModal()"></button>
+                </div>
+                <div class="modal-body">
+                  <form id="update-edit-form">
+                    <div class="mb-2">
+                      <label for="update-user" class="form-label">User</label>
+                      <input type="text" class="form-control" id="update-user" name="user" readonly>
+                    </div>
+                    <div class="mb-2">
+                      <label for="update-date" class="form-label">Date</label>
+                      <input type="text" class="form-control" id="update-date" name="date" readonly>
+                    </div>
+                    <div class="mb-2">
+                      <label for="update-desc" class="form-label">Description</label>
+                      <textarea class="form-control" id="update-desc" name="desc"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                  </form>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
     </main>
@@ -84,26 +108,64 @@
             document.body.classList.remove('dark-mode');
         }
     });
-    function toggleUpdates() {
-      const detail = document.getElementById('updates-detail');
-      detail.style.display = detail.style.display === 'none' ? 'block' : 'none';
-      if (detail.style.display === 'block') {
-        fetchUpdates();
-      }
-    }
+    let updatesData = [];
     function fetchUpdates() {
       fetch('/updates')
         .then(res => res.json())
         .then(updates => {
-          const list = document.getElementById('updates-list');
-          list.innerHTML = '';
-          updates.forEach(update => {
-            const li = document.createElement('li');
-            li.innerHTML = `<strong>${update.date}:</strong> ${update.detail}`;
-            list.appendChild(li);
-          });
+          updatesData = updates;
+          renderUpdateCards();
         });
     }
+    function renderUpdateCards() {
+      const container = document.getElementById('updates-cards');
+      container.innerHTML = '';
+      updatesData.forEach((update, idx) => {
+        const card = document.createElement('div');
+        card.className = 'card p-3';
+        card.style.minWidth = '220px';
+        card.innerHTML = `
+          <div><strong>User:</strong> ${update.user || 'Admin'}</div>
+          <div><strong>Date:</strong> ${update.date}</div>
+          <div><strong>Description:</strong> ${update.detail}</div>
+          <button class="btn btn-sm btn-info mt-2" onclick="showUpdateDetail(${idx})">Detail View</button>
+        `;
+        container.appendChild(card);
+      });
+    }
+    function showUpdateDetail(idx) {
+      const update = updatesData[idx];
+      document.getElementById('update-user').value = update.user || 'Admin';
+      document.getElementById('update-date').value = update.date;
+      document.getElementById('update-desc').value = update.detail;
+      document.getElementById('update-detail-modal').style.display = 'block';
+      document.getElementById('update-edit-form').onsubmit = function(e) {
+        e.preventDefault();
+        saveUpdate(idx);
+      };
+    }
+    function closeUpdateModal() {
+      document.getElementById('update-detail-modal').style.display = 'none';
+    }
+    function saveUpdate(idx) {
+      const newDesc = document.getElementById('update-desc').value;
+      fetch('/update/' + idx, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ detail: newDesc })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'success') {
+          updatesData[idx].detail = newDesc;
+          renderUpdateCards();
+          closeUpdateModal();
+        } else {
+          alert('Error updating: ' + data.message);
+        }
+      });
+    }
+    window.addEventListener('DOMContentLoaded', fetchUpdates);
 </script>
 </body>
 </html>
