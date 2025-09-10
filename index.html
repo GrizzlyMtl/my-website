@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Grizz's GitRepoShare</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A collaborative Git repository platform to discover, share, and manage code projects.">
+    <meta name="keywords" content="git, repository, code, sharing, collaboration, version control">
+    <meta name="author" content="Grizz's GitRepoShare">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="bg-primary text-white py-3 mb-4" role="banner">
+        <div class="container d-flex justify-content-between align-items-center flex-wrap">
+            <span class="site-title h2" style="color:#fff;" aria-label="GitRepoShare">GitRepoShare</span>
+                <button class="btn btn-secondary" aria-label="Toggle dark mode" style="margin-left:1em;">
+                    <i class="bi bi-moon"></i>
+                </button>
+        </div>
+    </header>
+    <main class="container" role="main">
+        <section class="mb-5" aria-label="Most Recent Website Updates">
+            <h3 class="mb-4" style="color:#2563eb;">Most Recent Website Updates</h3>
+            <input type="text" id="update-search" class="form-control mb-3" placeholder="Search updates by user, date, or description..." oninput="filterUpdates()">
+            <div id="updates-cards" class="d-flex flex-wrap gap-3"></div>
+        </section>
+    </main>
+    <section class="container mb-5" aria-label="New Ideas">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="mb-0" style="color:#eab308;">New Ideas</h4>
+            <a href="new-idea.html" class="btn btn-warning">Submit New Idea</a>
+        </div>
+        <div id="ideas-list"></div>
+    </section>
+    <footer class="bg-light py-3 mt-5">
+        <div class="container text-center">
+            <span class="text-muted">&copy; 2025 Grizz's GitRepoShare</span>
+        </div>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // Dark mode toggle logic
+    const DARK_MODE_KEY = 'colorMode';
+    const darkModeBtn = document.querySelector('.btn.btn-secondary[aria-label="Toggle dark mode"]');
+    function setColorMode(mode) {
+        if (mode === 'dark') {
+            document.body.classList.add('dark-mode');
+            localStorage.setItem(DARK_MODE_KEY, 'dark');
+        } else {
+            document.body.classList.remove('dark-mode');
+            localStorage.setItem(DARK_MODE_KEY, 'light');
+        }
+    }
+    darkModeBtn?.addEventListener('click', function() {
+        const isDark = document.body.classList.contains('dark-mode');
+        setColorMode(isDark ? 'light' : 'dark');
+    });
+    // On page load, restore color mode
+    window.addEventListener('DOMContentLoaded', function() {
+        const saved = localStorage.getItem(DARK_MODE_KEY);
+        if (saved === 'dark') {
+            document.body.classList.add('dark-mode');
+        } else {
+            document.body.classList.remove('dark-mode');
+        }
+        fetchUpdates();
+    });
+let updatesData = [];
+let filteredUpdates = [];
+let editing = false;
+let currentIdx = null;
+function fetchUpdates() {
+  fetch('/updates')
+    .then(res => res.json())
+    .then(updates => {
+      updatesData = updates;
+      filteredUpdates = updatesData;
+      renderUpdateCards();
+    });
+}
+function renderUpdateCards() {
+  const container = document.getElementById('updates-cards');
+  container.innerHTML = '';
+  filteredUpdates.forEach((update, idx) => {
+    const card = document.createElement('div');
+    card.className = 'card p-3 m-2';
+    card.style.minWidth = '220px';
+    card.innerHTML = `
+      <div><strong>User:</strong> ${update.user || 'Admin'}</div>
+      <div><strong>Date:</strong> ${update.date}</div>
+      <div><strong>Time:</strong> ${update.time || ''}</div>
+      <div><strong>Description:</strong> ${update.detail}</div>
+    `;
+    card.onclick = function() {
+      showUpdateDetail(idx);
+    };
+    container.appendChild(card);
+  });
+}
+function showUpdateDetail(idx) {
+  const update = updatesData[idx];
+  // Create modal
+  let modal = document.getElementById('update-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'update-modal';
+    modal.className = 'modal';
+    modal.style.display = 'block';
+    modal.innerHTML = `
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Edit Update</h5>
+            <button type="button" class="btn-close" onclick="closeUpdateModal()"></button>
+          </div>
+          <form id="edit-update-form">
+            <div class="modal-body">
+              <div class="mb-2">
+                <label>User</label>
+                <input type="text" class="form-control" id="edit-user" value="${update.user || ''}" required>
+              </div>
+              <div class="mb-2">
+                <label>Date</label>
+                <input type="text" class="form-control" id="edit-date" value="${update.date || ''}" required>
+              </div>
+              <div class="mb-2">
+                <label>Time</label>
+                <input type="text" class="form-control" id="edit-time" value="${update.time || ''}">
+              </div>
+              <div class="mb-2">
+                <label>Description</label>
+                <textarea class="form-control" id="edit-detail" required>${update.detail || ''}</textarea>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-primary">Save</button>
+              <button type="button" class="btn btn-secondary" onclick="closeUpdateModal()">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  } else {
+    modal.style.display = 'block';
+    modal.querySelector('#edit-user').value = update.user || '';
+    modal.querySelector('#edit-date').value = update.date || '';
+    modal.querySelector('#edit-time').value = update.time || '';
+    modal.querySelector('#edit-detail').value = update.detail || '';
+  }
+  document.getElementById('edit-update-form').onsubmit = function(e) {
+    e.preventDefault();
+    updatesData[idx] = {
+      user: document.getElementById('edit-user').value,
+      date: document.getElementById('edit-date').value,
+      time: document.getElementById('edit-time').value,
+      detail: document.getElementById('edit-detail').value
+    };
+    renderUpdateCards();
+    closeUpdateModal();
+  };
+}
+
+function closeUpdateModal() {
+  const modal = document.getElementById('update-modal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+}
+
+function filterUpdates() {
+  const query = document.getElementById('update-search').value.toLowerCase();
+  filteredUpdates = updatesData.filter(update =>
+    (update.user || '').toLowerCase().includes(query) ||
+    (update.date || '').toLowerCase().includes(query) ||
+    (update.detail || '').toLowerCase().includes(query)
+  );
+  renderUpdateCards();
+}
+function toggleEdit(enable) {
+  editing = enable;
+  document.getElementById('update-desc').readOnly = !enable;
+  document.getElementById('edit-btn').style.display = enable ? 'none' : 'block';
+  document.getElementById('edit-buttons').style.display = enable ? 'block' : 'none';
+  document.getElementById('modal-content').classList.toggle('editing', enable);
+}
+document.getElementById('update-edit-form').onsubmit = function(e) {
+  e.preventDefault();
+  saveUpdate(currentIdx);
+};
+function saveUpdate(idx) {
+  const newDesc = document.getElementById('update-desc').value;
+  fetch('/update/' + idx, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ detail: newDesc })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.status === 'success') {
+      updatesData[idx].detail = newDesc;
+      renderUpdateCards();
+      document.getElementById('save-confirm').style.display = 'block';
+      toggleEdit(false);
+      setTimeout(() => {
+        document.getElementById('save-confirm').style.display = 'none';
+      }, 1500);
+    } else {
+      alert('Error updating: ' + data.message);
+    }
+  });
+}
+function closeUpdateModal() {
+  const modal = document.getElementById('update-detail-modal');
+  modal.classList.remove('active');
+  modal.style.display = 'none';
+  toggleEdit(false);
+}
+document.getElementById('add-update-form').onsubmit = function(e) {
+  e.preventDefault();
+  const user = document.getElementById('add-user').value;
+  const type = document.getElementById('add-type').value;
+  const tags = document.getElementById('add-tags').value;
+  const detail = document.getElementById('add-detail').value;
+  fetch('/add_update', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user, type, tags, detail })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.status === 'success') {
+      updatesData.unshift(data.update);
+      filterUpdates();
+      document.getElementById('add-update-confirm').style.display = 'inline';
+      setTimeout(() => {
+        document.getElementById('add-update-confirm').style.display = 'none';
+      }, 1500);
+      document.getElementById('add-update-form').reset();
+    } else {
+      alert('Error adding update: ' + data.message);
+    }
+  });
+}
+window.addEventListener('DOMContentLoaded', function() {
+    const saved = localStorage.getItem(DARK_MODE_KEY);
+    if (saved === 'dark') {
+        document.body.classList.add('dark-mode');
+    } else {
+        document.body.classList.remove('dark-mode');
+    }
+    fetch('/updates')
+        .then(response => response.json())
+        .then(data => {
+            updatesData = data;
+            renderUpdates(updatesData);
+        });
+    fetch('/ideas')
+        .then(response => response.json())
+        .then(data => {
+            renderIdeas(data);
+        });
+});
+
+function renderUpdates(updates) {
+    const container = document.getElementById('updates-cards');
+    container.innerHTML = '';
+    updates.forEach((update, idx) => {
+        const card = document.createElement('div');
+        card.className = 'card p-3 mb-2 update-card';
+        card.style.cursor = 'pointer';
+        card.innerHTML = `
+            <div><strong>User:</strong> ${update.user}</div>
+            <div><strong>Date:</strong> ${update.date}</div>
+            <div><strong>Time:</strong> ${update.time}</div>
+            <div><strong>Description:</strong> ${update.detail}</div>
+        `;
+        card.addEventListener('click', function() {
+            showUpdateModal(update, idx);
+        });
+        container.appendChild(card);
+    });
+}
+
+function showUpdateModal(update, idx) {
+    let modal = document.getElementById('update-detail-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'update-detail-modal';
+        modal.className = 'modal';
+        modal.tabIndex = -1;
+        modal.style.display = 'block';
+        modal.innerHTML = `
+            <div class=\"modal-dialog\">
+                <div class=\"modal-content\">
+                    <div class=\"modal-header\">
+                        <h5 class=\"modal-title\">Update Detail</h5>
+                        <button type=\"button\" class=\"btn-close\" onclick=\"closeUpdateModal()\"></button>
+                    </div>
+                    <div class=\"modal-body\" id=\"modal-body\"></div>
+                    <div class=\"modal-footer\">
+                        <button id=\"edit-btn\" class=\"btn btn-warning\">Edit</button>
+                        <button type=\"button\" class=\"btn btn-secondary\" onclick=\"closeUpdateModal()\">Close</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    } else {
+        modal.style.display = 'block';
+    }
+    const body = modal.querySelector('#modal-body');
+    body.innerHTML = `
+        <div><strong>User:</strong> <span id=\"modal-user\">${update.user}</span></div>
+        <div><strong>Date:</strong> <span id=\"modal-date\">${update.date}</span></div>
+        <div><strong>Time:</strong> <span id=\"modal-time\">${update.time}</span></div>
+        <div><strong>Description:</strong> <span id=\"modal-detail\">${update.detail}</span></div>
+    `;
+    const editBtn = modal.querySelector('#edit-btn');
+    editBtn.onclick = function() {
+        enableEdit(update, idx);
+    };
+}
+
+function enableEdit(update, idx) {
+    const body = document.getElementById('modal-body');
+    body.innerHTML = `
+        <form id=\"edit-update-form\">
+            <div class=\"mb-2\">
+                <label>User</label>
+                <input type=\"text\" class=\"form-control\" id=\"edit-user\" value=\"${update.user}\" required>
+            </div>
+            <div class=\"mb-2\">
+                <label>Date</label>
+                <input type=\"text\" class=\"form-control\" id=\"edit-date\" value=\"${update.date}\" required>
+            </div>
+            <div class=\"mb-2\">
+                <label>Time</label>
+                <input type=\"text\" class=\"form-control\" id=\"edit-time\" value=\"${update.time}\" required>
+            </div>
+            <div class=\"mb-2\">
+                <label>Description</label>
+                <textarea class=\"form-control\" id=\"edit-detail\" required>${update.detail}</textarea>
+            </div>
+            <button type=\"submit\" class=\"btn btn-primary\">Save</button>
+            <button type=\"button\" class=\"btn btn-secondary\" onclick=\"closeUpdateModal()\">Cancel</button>
+        </form>
+    `;
+    document.getElementById('edit-update-form').onsubmit = function(e) {
+        e.preventDefault();
+        // Update locally (no backend persistence)
+        updates[idx] = {
+            user: document.getElementById('edit-user').value,
+            date: document.getElementById('edit-date').value,
+            time: document.getElementById('edit-time').value,
+            detail: document.getElementById('edit-detail').value
+        };
+        renderUpdates(updates);
+        closeUpdateModal();
+    };
+}
+
+function closeUpdateModal() {
+    const modal = document.getElementById('update-detail-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+function renderIdeas(ideas) {
+    let container = document.getElementById('ideas-list');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'ideas-list';
+        container.className = 'mt-4';
+        container.innerHTML = '<h4>New Ideas</h4><ul id="ideas-ul"></ul>';
+        document.getElementById('updates-cards').parentNode.appendChild(container);
+    }
+    const ul = container.querySelector('#ideas-ul');
+    ul.innerHTML = '';
+    ideas.forEach(idea => {
+        const li = document.createElement('li');
+        li.textContent = idea;
+        ul.appendChild(li);
+    });
+}
+    </script>
+</body>
+</html>
