@@ -31,8 +31,4 @@ MIT
 
 # my-website
 Learning Git
-<<<<<<< HEAD
-(your local changes)
-=======
 (changes from remote)
->>>>>>> main
