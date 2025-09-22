@@ -6,13 +6,13 @@ class WebsiteServer:
     def __init__(self):
         self.app = Flask(__name__)
         self.UPDATES = [
-            {"user": "Owner", "date": "2025-09-08", "time": "14:30", "detail": "Added dark mode with persistent setting."},
-            {"user": "Owner", "date": "2025-09-07", "time": "10:15", "detail": "Moved styles to style.css for better maintainability."},
-            {"user": "Owner", "date": "2025-09-06", "time": "16:45", "detail": "Created sitemap.xml for SEO."},
-            {"user": "Owner", "date": "2025-09-05", "time": "09:00", "detail": "Initial project setup and repository view."},
-            {"user": "Owner", "date": "2025-09-04", "time": "11:00", "detail": "Committed to regular updates and transparency."},
-            {"user": "Owner", "date": "2025-09-03", "time": "15:30", "detail": "Committed to improving accessibility features."},
-            {"user": "Owner", "date": "2025-09-02", "time": "13:20", "detail": "Committed to open source contributions."}
+            {"User": "Owner", "date": "2025-09-08", "time": "14:30", "detail": "Added dark mode with persistent setting."},
+            {"User": "Owner", "date": "2025-09-07", "time": "10:15", "detail": "Moved styles to style.css for better maintainability."},
+            {"User": "Owner", "date": "2025-09-06", "time": "16:45", "detail": "Created sitemap.xml for SEO."},
+            {"User": "Owner", "date": "2025-09-05", "time": "09:00", "detail": "Initial project setup and repository view."},
+            {"User": "Owner", "date": "2025-09-04", "time": "11:00", "detail": "Committed to regular updates and transparency."},
+            {"User": "Owner", "date": "2025-09-03", "time": "15:30", "detail": "Committed to improving accessibility features."},
+            {"User": "Owner", "date": "2025-09-02", "time": "13:20", "detail": "Committed to open source contributions."}
         ]
         self.setup_routes()
 
